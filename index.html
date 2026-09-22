@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Suivi de création des formulaires</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"><style id="css">
+:root{--bg:#EDF1F0;--surface:#FFFFFF;--ink:#15282C;--muted:#5B6E72;--line:#D5DDDC;--accent:#0B6E6E;--accent-ink:#FFFFFF;--done:#2E7D4F;--done-soft:#E1F0E6;--todo:#B4690E;--todo-soft:#FAEBD6;--danger:#B3261E;--empty:#DCE3E2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1A1C;--surface:#16252A;--ink:#E4ECEB;--muted:#93A6A9;--line:#2A3C40;--accent:#3FB5B2;--accent-ink:#06201F;--done:#5CC08A;--done-soft:#1B3A2A;--todo:#E0A04A;--todo-soft:#3A2B16;--danger:#F2877F;--empty:#24363A}}
+:root[data-theme="dark"]{--bg:#0F1A1C;--surface:#16252A;--ink:#E4ECEB;--muted:#93A6A9;--line:#2A3C40;--accent:#3FB5B2;--accent-ink:#06201F;--done:#5CC08A;--done-soft:#1B3A2A;--todo:#E0A04A;--todo-soft:#3A2B16;--danger:#F2877F;--empty:#24363A}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 20px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
+h1{font-size:clamp(1.5rem,3.2vw,2.1rem);line-height:1.15;margin:0;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:4px 0 0}
+.savebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status{font-size:.85rem;color:var(--muted)}
+.status.dirty{color:var(--todo);font-weight:600}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.overview{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:22px}
+.ov-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 20px}
+.ov-pct{font-size:clamp(2.2rem,6vw,3.2rem);font-weight:700;line-height:1;color:var(--done)}
+.ov-pct small{font-size:.35em;font-weight:500;color:var(--muted);margin-left:6px}
+.ov-nums{color:var(--muted)}
+.ov-nums b{color:var(--ink)}
+.strips{margin-top:16px;display:grid;gap:10px}
+.strip-row{display:grid;grid-template-columns:170px 1fr auto;gap:12px;align-items:center}
+.strip-name{font-weight:600;font-size:.9rem}
+.strip-pct{font-size:.85rem;color:var(--muted);min-width:48px;text-align:right}
+.pages{display:flex;flex-wrap:wrap;gap:3px}
+.pg{width:9px;height:14px;border-radius:2px;background:var(--empty)}
+.pg.on{background:var(--done)}
+.pg.off{background:var(--todo-soft);box-shadow:inset 0 0 0 1px var(--todo)}
+.none{font-size:.85rem;color:var(--muted)}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tab{background:none;border:none;border-bottom:3px solid transparent;border-radius:0;padding:10px 14px;white-space:nowrap;color:var(--muted);font-weight:500}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.tab .cnt{font-size:.8rem;margin-left:6px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi .v{font-size:1.5rem;font-weight:700;line-height:1.1}
+.kpi .l{font-size:.82rem;color:var(--muted)}
+.kpi.good .v{color:var(--done)}.kpi.warn .v{color:var(--todo)}
+.bar{height:10px;border-radius:5px;background:var(--empty);overflow:hidden;margin:4px 0 18px}
+.bar i{display:block;height:100%;background:var(--done);transition:width .3s}
+.toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.filters{display:flex;gap:4px}
+.filters button{padding:5px 11px;font-size:.85rem}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line)}
+th{font-size:.82rem;color:var(--muted);font-weight:600;background:var(--surface)}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right}
+td.ctr,th.ctr{text-align:center}
+.ref{font-weight:600}
+.lbl{color:var(--muted);font-size:.88rem}
+tr.is-todo td:first-child{box-shadow:inset 3px 0 0 var(--todo)}
+tr.is-done td:first-child{box-shadow:inset 3px 0 0 var(--done)}
+input[type=checkbox]{width:19px;height:19px;accent-color:var(--done);cursor:pointer;vertical-align:middle}
+.state{display:inline-block;font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px;vertical-align:middle}
+.state.d{background:var(--done-soft);color:var(--done)}.state.t{background:var(--todo-soft);color:var(--todo)}
+.acts{white-space:nowrap;text-align:right}
+.acts button{padding:4px 10px;font-size:.85rem}
+.acts button.del{color:var(--danger)}
+tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
+.empty-state{padding:28px;text-align:center;color:var(--muted)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:22px;width:min(420px,92vw)}
+dialog::backdrop{background:rgba(10,20,22,.45)}
+dialog h2{margin:0 0 14px;font-size:1.2rem}
+.field{display:grid;gap:4px;margin-bottom:12px}
+.field label{font-size:.85rem;font-weight:600}
+.field input[type=text],.field input[type=number]{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.check{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.err{color:var(--danger);font-size:.85rem;min-height:1.2em;margin:-4px 0 8px}
+.dlg-acts{display:flex;justify-content:flex-end;gap:8px}
+.note{font-size:.82rem;color:var(--muted);margin-top:20px}
+@media (max-width:620px){.strip-row{grid-template-columns:1fr auto}.strip-row .pages{grid-column:1/-1;order:3}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style></head><body><div id="root"></div><script type="application/json" id="state">{"updatedAt":null,"sections":[{"id":"prod","name":"Production","forms":[{"id":"p1","ref":"FO 3503","label":"","created":true,"pages":1},{"id":"p2","ref":"FO 3524","label":"","created":true,"pages":17},{"id":"p3","ref":"FO 3523","label":"","created":false,"pages":1},{"id":"p4","ref":"FO 3529-01","label":"NaCl","created":true,"pages":1},{"id":"p5","ref":"FO 3522","label":"","created":false,"pages":1},{"id":"p6","ref":"FO 3541","label":"","created":false,"pages":1},{"id":"p7","ref":"FO 1216","label":"","created":true,"pages":1},{"id":"p8","ref":"FO 557","label":"","created":true,"pages":1},{"id":"p9","ref":"FO 540","label":"","created":true,"pages":1},{"id":"p10","ref":"FO 078","label":"","created":true,"pages":1},{"id":"p11","ref":"FO 600","label":"","created":true,"pages":1},{"id":"p12","ref":"FO 2503","label":"","created":false,"pages":8},{"id":"p13","ref":"FO 1000","label":"","created":true,"pages":1},{"id":"p14","ref":"FO 527","label":"","created":true,"pages":1},{"id":"p15","ref":"FO 3520","label":"","created":true,"pages":8}]},{"id":"dg","name":"Direction générale","forms":[]},{"id":"cond","name":"Conditionnement","forms":[]},{"id":"cq","name":"Contrôle qualité","forms":[]}]}</script><script id="app">
+(function(){
+var HEAD='<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Suivi de création des formulaires</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">';
+var LS_KEY='fo-kpi-state-v1';
+var state;
+try{state=JSON.parse(document.getElementById('state').textContent);}catch(e){state={sections:[]};}
+var mode='loading'; // artifact | local | readonly
+var art=null, dirty=false, saving=false;
+var active=sessionStorage.getItem('fo-tab')||(state.sections[0]&&state.sections[0].id);
+var filter='all';
+var root=document.getElementById('root');
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function uid(){return 'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function stats(forms){var t=0,d=0,fd=0;forms.forEach(function(f){var p=Math.max(0,+f.pages||0);t+=p;if(f.created){d+=p;fd++;}});return{total:t,done:d,todo:t-d,pct:t?d/t*100:0,rest:t?(t-d)/t*100:0,forms:forms.length,formsDone:fd};}
+function fmt(n){return (Math.round(n*10)/10).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';}
+function sec(){return state.sections.find(function(s){return s.id===active;})||state.sections[0];}
+function allForms(){return state.sections.reduce(function(a,s){return a.concat(s.forms);},[]);}
+
+function pageStrip(forms){
+  if(!forms.length)return '<span class="none">Aucun formulaire</span>';
+  var h='';forms.forEach(function(f){var n=Math.max(0,+f.pages||0);for(var i=0;i<n;i++)h+='<span class="pg '+(f.created?'on':'off')+'" title="'+esc(f.ref)+' — page '+(i+1)+'/'+n+'"></span>';});
+  return '<div class="pages" aria-hidden="true">'+h+'</div>';
+}
+
+function statusText(){
+  if(mode==='loading')return '<span class="status">Chargement…</span>';
+  if(mode==='readonly')return '<span class="status">Lecture seule</span>';
+  if(saving)return '<span class="status">Enregistrement…</span>';
+  if(dirty)return '<span class="status dirty">Modifications non enregistrées</span>';
+  var u=state.updatedAt?new Date(state.updatedAt).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):null;
+  return '<span class="status">'+(u?'Enregistré le '+u:'Tout est enregistré')+'</span>';
+}
+
+function render(){
+  var g=stats(allForms()), s=sec(), st=stats(s.forms);
+  var ro=mode==='readonly';
+  var rows=s.forms.filter(function(f){return filter==='all'||(filter==='done'?f.created:!f.created);});
+  var h='<div class="wrap">';
+  h+='<header class="top"><div><h1>Suivi de création des formulaires</h1><p class="sub">Avancement par service, compté en pages</p></div>';
+  h+='<div class="savebar">'+statusText()+(ro?'':'<button class="primary" id="save" '+(dirty&&!saving?'':'disabled')+'>Enregistrer</button>')+'</div></header>';
+
+  h+='<section class="overview" aria-label="Vue d\'ensemble"><div class="ov-head"><div class="ov-pct">'+fmt(g.pct)+'<small>des pages créées</small></div>';
+  h+='<div class="ov-nums"><b>'+g.done+'</b> / '+g.total+' pages créées · <b>'+g.todo+'</b> restantes ('+fmt(g.rest)+') · <b>'+g.formsDone+'</b> / '+g.forms+' formulaires</div></div><div class="strips">';
+  state.sections.forEach(function(x){var sx=stats(x.forms);h+='<div class="strip-row"><span class="strip-name">'+esc(x.name)+'</span>'+pageStrip(x.forms)+'<span class="strip-pct">'+(sx.total?fmt(sx.pct):'—')+'</span></div>';});
+  h+='</div></section>';
+
+  h+='<div class="tabs" role="tablist">';
+  state.sections.forEach(function(x){h+='<button class="tab" role="tab" data-tab="'+x.id+'" aria-selected="'+(x.id===s.id)+'">'+esc(x.name)+'<span class="cnt">'+x.forms.length+'</span></button>';});
+  h+='</div>';
+
+  h+='<div class="kpis"><div class="kpi"><div class="v">'+st.total+'</div><div class="l">Pages au total</div></div>';
+  h+='<div class="kpi good"><div class="v">'+st.done+'</div><div class="l">Pages créées ('+fmt(st.pct)+')</div></div>';
+  h+='<div class="kpi warn"><div class="v">'+st.todo+'</div><div class="l">Pages à créer ('+fmt(st.rest)+')</div></div>';
+  h+='<div class="kpi"><div class="v">'+st.formsDone+' / '+st.forms+'</div><div class="l">Formulaires créés</div></div></div>';
+  h+='<div class="bar" role="progressbar" aria-valuenow="'+Math.round(st.pct)+'" aria-valuemin="0" aria-valuemax="100" aria-label="Pages créées"><i style="width:'+st.pct.toFixed(1)+'%"></i></div>';
+
+  h+='<div class="toolbar"><div class="filters">';
+  [['all','Tous'],['done','Créés'],['todo','Non créés']].forEach(function(f){h+='<button data-filter="'+f[0]+'" aria-pressed="'+(filter===f[0])+'">'+f[1]+'</button>';});
+  h+='</div>'+(ro?'':'<button class="primary" id="add">Ajouter un formulaire</button>')+'</div>';
+
+  h+='<div class="tablewrap"><table><thead><tr><th>Référence</th><th class="ctr">Créé</th><th class="num">Nb de pages</th>'+(ro?'':'<th></th>')+'</tr></thead><tbody>';
+  if(!rows.length){h+='<tr><td colspan="'+(ro?3:4)+'" class="empty-state">'+(s.forms.length?'Aucun formulaire pour ce filtre.':'Aucun formulaire dans ce service. Ajoutez le premier avec « Ajouter un formulaire ».')+'</td></tr>';}
+  rows.forEach(function(f){
+    h+='<tr class="'+(f.created?'is-done':'is-todo')+'"><td><span class="ref">'+esc(f.ref)+'</span>'+(f.label?' <span class="lbl">'+esc(f.label)+'</span>':'')+'</td>';
+    h+='<td class="ctr"><input type="checkbox" data-toggle="'+f.id+'" '+(f.created?'checked':'')+(ro?' disabled':'')+' aria-label="'+esc(f.ref)+' créé"><span class="state '+(f.created?'d':'t')+'">'+(f.created?'Créé':'Non créé')+'</span></td>';
+    h+='<td class="num">'+(+f.pages||0)+'</td>';
+    if(!ro)h+='<td class="acts"><button data-edit="'+f.id+'">Modifier</button> <button class="del" data-del="'+f.id+'">Supprimer</button></td>';
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  if(s.forms.length)h+='<tfoot><tr><td>Total '+esc(s.name)+'</td><td class="ctr">'+st.formsDone+' / '+st.forms+'</td><td class="num">'+st.total+'</td>'+(ro?'':'<td></td>')+'</tr></tfoot>';
+  h+='</table></div>';
+  if(mode==='local')h+='<p class="note">Les données sont enregistrées dans ce navigateur uniquement.</p>';
+  h+='</div>';
+
+  h+='<dialog id="dlg"><form method="dialog" id="dform"><h2 id="dtitle">Formulaire</h2>';
+  h+='<div class="field"><label for="fref">Référence</label><input type="text" id="fref" placeholder="FO 3503" required></div>';
+  h+='<div class="field"><label for="flabel">Désignation (facultatif)</label><input type="text" id="flabel" placeholder="ex. NaCl"></div>';
+  h+='<div class="field"><label for="fpages">Nombre de pages</label><input type="number" id="fpages" min="1" step="1" value="1" required></div>';
+  h+='<label class="check"><input type="checkbox" id="fcreated"> Formulaire créé</label><p class="err" id="ferr"></p>';
+  h+='<div class="dlg-acts"><button type="button" id="dcancel">Annuler</button><button class="primary" type="submit" id="dok">Ajouter</button></div></form></dialog>';
+  root.innerHTML=h;
+}
+
+var editingId=null;
+function openDlg(f){
+  var d=document.getElementById('dlg');editingId=f?f.id:null;
+  document.getElementById('dtitle').textContent=f?'Modifier '+f.ref:'Ajouter un formulaire — '+sec().name;
+  document.getElementById('dok').textContent=f?'Enregistrer':'Ajouter';
+  document.getElementById('fref').value=f?f.ref:'';
+  document.getElementById('flabel').value=f?f.label||'':'';
+  document.getElementById('fpages').value=f?f.pages:1;
+  document.getElementById('fcreated').checked=f?!!f.created:false;
+  document.getElementById('ferr').textContent='';
+  d.showModal();document.getElementById('fref').focus();
+}
+function submitDlg(ev){
+  ev.preventDefault();
+  var ref=document.getElementById('fref').value.trim().replace(/\s+/g,' ');
+  var pages=parseInt(document.getElementById('fpages').value,10);
+  var err=document.getElementById('ferr');
+  if(!ref){err.textContent='Saisissez la référence du formulaire.';return;}
+  if(!(pages>=1)){err.textContent='Le nombre de pages doit être au moins 1.';return;}
+  var s=sec();
+  var dup=s.forms.some(function(f){return f.id!==editingId&&f.ref.toLowerCase()===ref.toLowerCase();});
+  if(dup){err.textContent='Cette référence existe déjà dans ce service.';return;}
+  var data={ref:ref,label:document.getElementById('flabel').value.trim(),pages:pages,created:document.getElementById('fcreated').checked};
+  if(editingId){var f=s.forms.find(function(x){return x.id===editingId;});Object.assign(f,data);}
+  else{data.id=uid();s.forms.push(data);}
+  document.getElementById('dlg').close();
+  changed();
+}
+
+function changed(){dirty=true;if(mode==='local')save();else render();}
+
+function buildDoc(){
+  var css=document.getElementById('css').textContent;
+  var app=document.getElementById('app').textContent;
+  var json=JSON.stringify(state).replace(/</g,'\\u003c');
+  var sc='scr'+'ipt';
+  return '<!doctype html>\n<html lang="fr"><head>'+HEAD+'<style id="css">'+css+'</style></head><body><div id="root"></div><'+sc+' type="application/json" id="state">'+json+'</'+sc+'><'+sc+' id="app">'+app+'</'+sc+'></body></html>';
+}
+
+function save(){
+  if(saving)return;
+  state.updatedAt=new Date().toISOString();
+  if(mode==='local'){
+    try{localStorage.setItem(LS_KEY,JSON.stringify(state));dirty=false;}catch(e){}
+    render();return;
+  }
+  if(mode!=='artifact'||!art)return;
+  saving=true;render();
+  art.publish(buildDoc()).then(function(){saving=false;dirty=false;}).catch(function(e){
+    saving=false;var c=e&&e.code;
+    if(c==='conflict'){dirty=false;return;}
+    if(c==='not_writer'||c==='not_granted'||c==='not_declared'||c==='consent_required'){mode='readonly';dirty=false;render();return;}
+    if(c==='rate_limited'){render();alert('Trop d\'enregistrements rapprochés. Réessayez dans quelques secondes.');return;}
+    render();alert('L\'enregistrement a échoué. Vos modifications sont conservées sur cette page : réessayez avec « Enregistrer ».');
+  });
+}
+
+root.addEventListener('click',function(e){
+  var t=e.target.closest('button');if(!t)return;
+  if(t.dataset.tab){active=t.dataset.tab;filter='all';try{sessionStorage.setItem('fo-tab',active);}catch(_){ }render();return;}
+  if(t.dataset.filter){filter=t.dataset.filter;render();return;}
+  if(t.id==='add'){openDlg(null);return;}
+  if(t.id==='save'){save();return;}
+  if(t.id==='dcancel'){document.getElementById('dlg').close();return;}
+  if(t.dataset.edit){openDlg(sec().forms.find(function(f){return f.id===t.dataset.edit;}));return;}
+  if(t.dataset.del){var s=sec(),f=s.forms.find(function(x){return x.id===t.dataset.del;});
+    if(f&&confirm('Supprimer le formulaire '+f.ref+' ?')){s.forms=s.forms.filter(function(x){return x!==f;});changed();}return;}
+});
+root.addEventListener('change',function(e){
+  var id=e.target.dataset&&e.target.dataset.toggle;if(!id)return;
+  var f=sec().forms.find(function(x){return x.id===id;});if(f){f.created=e.target.checked;changed();}
+});
+root.addEventListener('submit',function(e){if(e.target.id==='dform')submitDlg(e);});
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();if(dirty)save();}});
+window.addEventListener('beforeunload',function(e){if(dirty&&mode==='artifact'&&!saving){e.preventDefault();e.returnValue='';}});
+
+render();
+function useLocal(){
+  mode='local';
+  try{var raw=localStorage.getItem(LS_KEY);if(raw){var s=JSON.parse(raw);if(s&&s.sections)state=s;}}catch(_){}
+  if(!state.sections.some(function(x){return x.id===active;}))active=state.sections[0].id;
+  render();
+}
+if(window.claude&&typeof window.claude.use==='function'){
+  window.claude.use('artifact').then(function(a){if(a){art=a;mode='artifact';render();}else useLocal();}).catch(useLocal);
+}else useLocal();
+})();
+</script></body></html>
